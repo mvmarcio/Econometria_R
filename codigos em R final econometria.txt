@@ -1,0 +1,186 @@
+#instalando o pacote da regressão logit e probit
+> install.packages("glmnet")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/prihh/AppData/Local/R/win-library/4.3’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/glmnet_4.1-7.zip'
+Content type 'application/zip' length 2470320 bytes (2.4 MB)
+downloaded 2.4 MB
+
+package ‘glmnet’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\prihh\AppData\Local\Temp\Rtmp86z2PB\downloaded_packages
+> #modelo logit
+> logit <- glm(PRESENÇA ~ COORDENACAO + PROFESSORES, data =DADOS, family = binomial(link = "logit"))
+> summary(logit)
+
+Call:
+glm(formula = PRESENÇA ~ COORDENACAO + PROFESSORES, family = binomial(link = "logit"), 
+    data = DADOS)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -2.4175     0.1072 -22.546  < 2e-16 ***
+COORDENACAO  -0.1212     0.1243  -0.975  0.32959    
+PROFESSORES  -0.3670     0.1352  -2.715  0.00662 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3573.4  on 8162  degrees of freedom
+Residual deviance: 3559.1  on 8160  degrees of freedom
+AIC: 3565.1
+
+Number of Fisher Scoring iterations: 5
+
+> #em proporção
+> exp(logit$coefficients)
+(Intercept) COORDENACAO PROFESSORES 
+ 0.08914475  0.88588865  0.69283388 
+> #modelo probit
+> probit <- glm(PRESENÇA ~ COORDENACAO + PROFESSORES, data =DADOS, family = binomial(link = "probit"))
+> summary(probit)
+
+Call:
+glm(formula = PRESENÇA ~ COORDENACAO + PROFESSORES, family = binomial(link = "probit"), 
+    data = DADOS)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.39431    0.05298 -26.319  < 2e-16 ***
+COORDENACAO -0.05572    0.05913  -0.942  0.34600    
+PROFESSORES -0.17663    0.06542  -2.700  0.00693 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3573.4  on 8162  degrees of freedom
+Residual deviance: 3559.2  on 8160  degrees of freedom
+AIC: 3565.2
+
+Number of Fisher Scoring iterations: 5
+
+> dim(DADOS)
+[1] 8163    3
+> names(DADOS)
+[1] "COORDENACAO" "PROFESSORES" "PRESENÇA"   
+> sapply(DADOS, class)
+COORDENACAO PROFESSORES    PRESENÇA 
+  "numeric"   "numeric"   "numeric" 
+> summary(DADOS)
+  COORDENACAO      PROFESSORES        PRESENÇA      
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:1.0000   1st Qu.:1.0000   1st Qu.:0.00000  
+ Median :1.0000   Median :1.0000   Median :0.00000  
+ Mean   :0.7644   Mean   :0.8378   Mean   :0.05709  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.00000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.00000  
+> # Carregar a biblioteca ggplot2
+> library(ggplot2)
+> # Ajustar o modelo logístico
+> logit <- glm(PRESENÇA ~ COORDENACAO + PROFESSORES, data = DADOS, family = binomial(link = "logit"))
+> # Criar um data frame com valores preditos e observados
+> dados_plot <- data.frame(
++   PRESENCA_OBS = DADOS$PRESENÇA,                         # Variável resposta observada
++   PRESENCA_PRED = predict(logit, type = "response")      # Probabilidades preditas pelo modelo
++ )
+> # Criar o gráfico de dispersão e linha de ajuste
+> ggplot(dados_plot, aes(x = PRESENCA_PRED, y = PRESENCA_OBS)) +
++   geom_point() +
++   geom_smooth(method = "glm", method.args = list(family = binomial(link = "logit")), se = FALSE) +
++   xlab("Probabilidades Preditas") +
++   ylab("Variável Resposta Observada") +
++   ggtitle("Gráfico de Regressão Logística")
+`geom_smooth()` using formula = 'y ~ x'
+> # Criar o gráfico de dispersão e linha de ajuste
+> ggplot(dados_plot, aes(x = PRESENCA_PRED, y = PRESENCA_OBS)) +
++   geom_point() +
++   geom_smooth(method = "glm", method.args = list(family = binomial(link = "logit")), se = FALSE) +
++   xlab("Probabilidades Preditas") +
++   ylab("Variável Resposta Observada") +
++   ggtitle("Gráfico em forma de S")
+`geom_smooth()` using formula = 'y ~ x'
+> #medias marginais
+> install.packages("margins")
+Error in install.packages : Updating loaded packages
+> install.packages("margins")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Warning in install.packages :
+  package ‘margins’ is in use and will not be installed
+> library(margins)
+> summary(logit)
+
+Call:
+glm(formula = PRESENÇA ~ COORDENACAO + PROFESSORES, family = binomial(link = "logit"), 
+    data = DADOS)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -2.4175     0.1072 -22.546  < 2e-16 ***
+COORDENACAO  -0.1212     0.1243  -0.975  0.32959    
+PROFESSORES  -0.3670     0.1352  -2.715  0.00662 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3573.4  on 8162  degrees of freedom
+Residual deviance: 3559.1  on 8160  degrees of freedom
+AIC: 3565.1
+
+Number of Fisher Scoring iterations: 5
+
+> margins(logit, type="response")
+Average marginal effects
+glm(formula = PRESENÇA ~ COORDENACAO + PROFESSORES, family = binomial(link = "logit"),     data = DADOS)
+
+ COORDENACAO PROFESSORES
+    -0.00651    -0.01972
+> #média para o modelo probit
+> probit <- glm(PRESENÇA ~ COORDENACAO + PROFESSORES, data =DADOS, family = binomial(link = "probit"))
+> summary(probit)
+
+Call:
+glm(formula = PRESENÇA ~ COORDENACAO + PROFESSORES, family = binomial(link = "probit"), 
+    data = DADOS)
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.39431    0.05298 -26.319  < 2e-16 ***
+COORDENACAO -0.05572    0.05913  -0.942  0.34600    
+PROFESSORES -0.17663    0.06542  -2.700  0.00693 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3573.4  on 8162  degrees of freedom
+Residual deviance: 3559.2  on 8160  degrees of freedom
+AIC: 3565.2
+
+Number of Fisher Scoring iterations: 5
+
+> margins(probit, type="response")
+Average marginal effects
+glm(formula = PRESENÇA ~ COORDENACAO + PROFESSORES, family = binomial(link = "probit"),     data = DADOS)
+
+ COORDENACAO PROFESSORES
+   -0.006361    -0.02016
+> # Calcular a inversa de Mills (invmills)
+> invmills <- 1 - pnorm(summary(logit)$coefficients[, "Estimate"])
+> # Imprimir a inversa de Mills
+> print(invmills)
+(Intercept) COORDENACAO PROFESSORES 
+  0.9921861   0.5482194   0.6431774 
+> invmills <- 1 - pnorm(summary(probit)$coefficients[, "Estimate"])
+> print(invmills)
+(Intercept) COORDENACAO PROFESSORES 
+  0.9183884   0.5222195   0.5700998 
+> 
